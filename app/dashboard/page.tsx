@@ -10,8 +10,17 @@ import {
   CardsSkeleton,
 } from '@/app/ui/skeletons';
 import { fetchRevenue } from '@/app/lib/data';
+import { fetchInvoicesPages } from '@/app/lib/data';
+import Pagination from '../ui/invoices/pagination';
 
-export default async function Page() {
+export default async function Page({
+  searchParams,
+}: {
+  searchParams?: {
+    query?: string,
+    page?: string
+  }
+}) {
   //   const revenue = await fetchRevenue();
   const latestInvoices = await fetchLatestInvoices();
   const {
@@ -20,7 +29,12 @@ export default async function Page() {
     totalPaidInvoices,
     totalPendingInvoices,
   } = await fetchCardData();
+
+  const query = searchParams?.query || '';
+  const currentPage = Number(searchParams?.page) || 1;
+
   const revenue = await fetchRevenue(); // Fetch data inside the component
+  const totalPages = await fetchInvoicesPages(query);
 
   return (
     <main>
@@ -45,6 +59,9 @@ export default async function Page() {
         <Suspense fallback={<LatestInvoicesSkeleton />}>
           <LatestInvoices latestInvoices={latestInvoices} />
         </Suspense>
+        <div className="mt-5 flex w-full justify-center">
+          <Pagination totalPages={totalPages} />
+        </div>
       </div>
     </main>
   );
